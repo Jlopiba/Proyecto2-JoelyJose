@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Robots</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        form { margin-bottom: 20px; border: 1px solid #ccc; padding: 15px; border-radius: 5px; }
+        input, select { margin: 5px 0; padding: 5px; }
+        button { margin-top: 10px; padding: 7px 15px; }
+    </style>
+</head>
+<body>
+    <h1>Gestión de Robots</h1>
+
+    <!-- Añadir robot -->
+    <form id="addRobotForm">
+        <h2>Añadir Robot</h2>
+        <label>Nombre del Robot:</label>
+        <input type="text" id="robotName" required>
+        <button type="submit">Añadir</button>
+    </form>
+
+    <!-- Set medidas -->
+    <form id="setMedidasForm">
+        <h2>Actualizar Medidas</h2>
+        <label>Nombre del Robot:</label>
+        <input type="text" id="medidasRobotName" required><br>
+        <label>Estado Cinta (0/1):</label>
+        <input type="number" id="ecinta" min="0" max="1" required><br>
+        <label>Estado Sensor (0/1):</label>
+        <input type="number" id="esensor" min="0" max="1" required><br>
+        <label>Estado Pinza (0/1):</label>
+        <input type="number" id="epinza" min="0" max="1" required><br>
+        <button type="submit">Actualizar Medidas</button>
+    </form>
+
+    <!-- Añadir instrucción -->
+    <form id="addInstruccionForm">
+        <h2>Añadir Instrucción</h2>
+        <label>Nombre del Robot:</label>
+        <input type="text" id="instruccionRobotName" required><br>
+        <label>Instrucción:</label>
+        <input type="text" id="instruccionText" required><br>
+        <button type="submit">Añadir Instrucción</button>
+    </form>
+
+    <div id="result" style="margin-top: 20px; color: green;"></div>
+
+    <script>
+        const resultDiv = document.getElementById('result');
+
+        document.getElementById('addRobotForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('robotName').value;
+            const res = await fetch('/robots/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name })
+            });
+            const data = await res.json();
+            resultDiv.textContent = res.ok ? 'Robot añadido: ' + JSON.stringify(data) : 'Error: ' + data.error;
+        });
+
+        document.getElementById('setMedidasForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('medidasRobotName').value;
+            const ecinta = parseInt(document.getElementById('ecinta').value);
+            const esensor = parseInt(document.getElementById('esensor').value);
+            const epinza = parseInt(document.getElementById('epinza').value);
+            const res = await fetch(`/robots/${name}/medidas`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ecinta, esensor, epinza })
+            });
+            const data = await res.json();
+            resultDiv.textContent = res.ok ? data.message : 'Error: ' + data.error;
+        });
+
+        document.getElementById('addInstruccionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const robot_name = document.getElementById('instruccionRobotName').value;
+            const instruccion = document.getElementById('instruccionText').value;
+            const res = await fetch('/robots/instruccion', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ instruccion, robot_name })
+            });
+            const data = await res.json();
+            resultDiv.textContent = res.ok ? data.message : 'Error: ' + data.error;
+        });
+    </script>
+</body>
+</html>
